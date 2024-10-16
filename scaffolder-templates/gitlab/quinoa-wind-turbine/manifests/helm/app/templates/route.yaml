@@ -19,5 +19,6 @@ spec:
     name: {{ include "quarkus-template.fullname" $ }}
   tls:
     termination: edge
+    insecureEdgeTerminationPolicy: Redirect
   wildcardPolicy: None
 {{- end }}
