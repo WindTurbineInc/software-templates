@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mcp-weather
+  name: mcp-weather
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    app: mcp-weather
+  sessionAffinity: None
+  type: ClusterIP

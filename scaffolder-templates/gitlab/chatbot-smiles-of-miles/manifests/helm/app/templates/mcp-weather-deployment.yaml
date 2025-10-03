@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mcp-weather
+  name: mcp-weather
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-weather
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: mcp-weather
+    spec:
+      containers:
+      - image: quay.io/bluesman/mcp-weather:latest
+        imagePullPolicy: Always
+        name: mcp-weather
+      restartPolicy: Always
