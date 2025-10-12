@@ -23,6 +23,19 @@ spec:
         - resources:
             limits:
               memory: 512Mi
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - |
+                    export PGPASSWORD=${POSTGRESQL_PASSWORD}
+                    until pg_isready -h localhost -U ${POSTGRESQL_USER} -d ${POSTGRESQL_DATABASE}; do
+                      echo "Waiting for PostgreSQL to be ready..."
+                      sleep 2
+                    done
+                    psql -h localhost -U ${POSTGRESQL_USER} -d ${POSTGRESQL_DATABASE} -c "CREATE EXTENSION IF NOT EXISTS vector;" || true
           readinessProbe:
             exec:
               command:
