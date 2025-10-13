@@ -71,7 +71,7 @@ spec:
                   title: Image Host
                   type: string
                   description: Host for storing image
-                  default: quay-thwf8.apps.cluster-thwf8.thwf8.sandbox1044.opentlc.com
+                  default: quay-thwf8.apps.cluster-mmfq5.mmfq5.sandbox2588.opentlc.com
                 image_organization:
                   title: Organization
                   type: string
@@ -94,9 +94,9 @@ spec:
               title: Repo Host
               type: string
               description: Your SCM host
-              default: gitlab-gitlab.apps.cluster-thwf8.thwf8.sandbox1044.opentlc.com
+              default: gitlab-gitlab.apps.cluster-mmfq5.mmfq5.sandbox2588.opentlc.com
               enum:
-                - gitlab-gitlab.apps.cluster-thwf8.thwf8.sandbox1044.opentlc.com
+                - gitlab-gitlab.apps.cluster-mmfq5.mmfq5.sandbox2588.opentlc.com
             owner:
               title: Repo Owner
               type: string
@@ -126,7 +126,7 @@ spec:
           description: ${{ parameters.description }}
           namespace: ${{ parameters.component_id }}-dev
           owner: ${{ user.entity.metadata.name }}
-          cluster: .apps.cluster-thwf8.thwf8.sandbox1044.opentlc.com
+          cluster: .apps.cluster-mmfq5.mmfq5.sandbox2588.opentlc.com
           host: ${{ parameters.repo.host }}
           destination: ${{ parameters.repo.owner }}/${{ parameters.component_id }}
           quay_destination: ${{ parameters.image_organization}}/${{ parameters.component_id }}
@@ -162,7 +162,7 @@ spec:
           source_repository: https://${{ parameters.repo.host }}/${{ parameters.repo.owner }}/${{parameters.component_id}}.git
           repository_name: ${{parameters.component_id}}
           git_owner: ${{ parameters.repo.owner }}
-          cluster: .apps.cluster-thwf8.thwf8.sandbox1044.opentlc.com
+          cluster: .apps.cluster-mmfq5.mmfq5.sandbox2588.opentlc.com
           namespace: ${{ parameters.component_id }}-dev
           image_registry: ${{ parameters.image_registry }}
           image_host: ${{ parameters.image_host }}
