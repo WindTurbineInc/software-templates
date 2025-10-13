@@ -31,11 +31,11 @@ spec:
                   - -c
                   - |
                     export PGPASSWORD=postgres
-                    until pg_isready -h localhost -U postgres -d postgres; do
+                    until pg_isready -h localhost -U postgres -d ${POSTGRESQL_DATABASE}; do
                       echo "Waiting for PostgreSQL to be ready..."
                       sleep 2
                     done
-                    psql -h localhost -U postgres -d postgres -c "CREATE EXTENSION IF NOT EXISTS vector;"
+                    psql -h localhost -U postgres -d ${POSTGRESQL_DATABASE} -c "CREATE EXTENSION IF NOT EXISTS vector;"
           readinessProbe:
             exec:
               command:
