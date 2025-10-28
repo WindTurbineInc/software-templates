@@ -32,6 +32,11 @@ spec:
           type: string
           description: Help others understand what this website is for.
           default: EAP 8 Quickstart
+        eap_app_git:
+          title: Git Repo for JBoss app
+          type: string
+          description: Source code where to start from
+          default: https://github.com/jboss-eap-up-and-running/eap8-getting-started.git
         cluster_id:
           title: Cluster Id
           type: string
@@ -157,6 +162,7 @@ spec:
           destination: https://${{ parameters.repo.host }}/${{ parameters.repo.owner }}/${{parameters.component_id}}-gitops.git
           source_repository: https://${{ parameters.repo.host }}/${{ parameters.repo.owner }}/${{parameters.component_id}}.git
           repository_name: ${{parameters.component_id}}
+          eap_app_git: ${{parameters.eap_app_git}}
           git_owner: ${{ parameters.repo.owner }}
           cluster: ${{ parameters.cluster_id }}
           namespace: ${{ parameters.component_id }}-dev
