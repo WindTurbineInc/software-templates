@@ -30,8 +30,17 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{/*
+Common labels
+*/}}
+{{- define "backstage.labels" -}}
+backstage.io/kubernetes-id: ${{values.component_id}}
+{{- end }}
+
+
 {{- define "eap8.labels" -}}
 helm.sh/chart: {{ include "eap8.chart" . }}
+backstage.io/kubernetes-id: ${{values.component_id}}
 {{ include "wildfly-common.selectorLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.openshift.io/runtime: eap
