@@ -1,16 +1,16 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: wind-turbine-template
-  title: Wind Turbine Software Supply Chain
-  description: Create Wind Turbine game using Quarkus, Kafka and Infinispan with Trusted Software Supply Chain
+  name: eap8-quickstart
+  title: JBoss EAP8 Quickstart (Helm)
+  description: Create JBoss EAP8 app using Helm on OpenShift
   tags:
     - recommended
     - java
-    - quarkus
+    - eap
     - maven
-    - kafka
-    - infinispan
+    - eap8
+    - jboss
 spec:
   owner: rhdh
   type: service
@@ -24,19 +24,19 @@ spec:
           title: Name
           type: string
           description: Unique name of the component
-          default: game-secure
+          default: eap8
           ui:field: EntityNamePicker
           maxLength: 16
         description:
           title: Description
           type: string
           description: Help others understand what this website is for.
-          default: Wind Turbine Game
+          default: EAP 8 Quickstart
         cluster_id:
           title: Cluster Id
           type: string
           description: Id of the cluster
-          default: .apps.cluster-zbkfk.sandbox1339.opentlc.com
+          default: .apps.cluster-b7zd2.b7zd2.sandbox2514.opentlc.com
     - title: Provide Image Registry Information
       required:
         - image_registry
@@ -72,7 +72,7 @@ spec:
                   title: Image Host
                   type: string
                   description: Host for storing image
-                  default: quay-zbkfk.apps.cluster-zbkfk.sandbox1339.opentlc.com
+                  default: quay-b7zd2.apps.cluster-b7zd2.b7zd2.sandbox2514.opentlc.com
                 image_organization:
                   title: Organization
                   type: string
@@ -95,7 +95,7 @@ spec:
               title: Repo Host
               type: string
               description: Your SCM host
-              default: gitlab-gitlab.apps.cluster-zbkfk.sandbox1339.opentlc.com
+              default: gitlab-gitlab.apps.cluster-b7zd2.b7zd2.sandbox2514.opentlc.com
             owner:
               title: Repo Owner
               type: string
