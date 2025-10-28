@@ -1,23 +1,243 @@
-<!--
-    JBoss, Home of Professional Open Source
-    Copyright 2015, Red Hat, Inc. and/or its affiliates, and individual
-    contributors by the @authors tag. See the copyright.txt in the
-    distribution for a full listing of individual contributors.
+<!doctype html>
+<html lang="en">
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
--->
-<!-- Plain HTML page that kicks us into the app -->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="shortcut icon" href="assets/img/redhat.png">
 
-<html>
-    <head>
-        <meta http-equiv="Refresh" content="0; URL=HelloWorld">
-    </head>
+  <title>JBoss EAP 8 on Red Hat OpenShift</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="css/helloworld.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- navbar -->
+  <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+    <a class="navbar-brand my-0 mr-md-auto font-weight-normal" href="/index.html">
+        <img src="img/eap-logo.png" height="36">&nbsp;|&nbsp;<img
+            src="img/Asset-Red_Hat-Logo_page-Logo-RGB.svg" height="36">
+    </a>
+    <nav class="my-2 my-md-0 mr-md-3">
+        <a class="p-2 text-dark" href="https://www.redhat.com/en/technologies/jboss-middleware/application-platform">Features</a>
+    </nav>
+    <a class="btn btn-outline-primary" href="https://www.redhat.com/en/technologies/jboss-middleware/application-platform#contact-form">Contact Sales</a>
+  </div>
+  <!-- end navbar -->
+
+  <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">JBoss EAP 8 on Red Hat OpenShift</h1>
+    <p class="lead">Congratulations! You have deployed your first successful JBoss EAP 8 application, running on Red Hat OpenShift.</p>
+
+    <p>This page is served by your application. The source is in <code>src/main/webapp/index.html</code>.</p>
+  </div>
+
+  <div class="container">
+    <div class="card-deck mb-2 text-center">
+      <div class="card mb-4 box-shadow">
+        <div class="card-header">
+          <h4 class="my-0 font-weight-normal">Java Runtime</h4>
+        </div>
+        <div class="card-body">
+          <img src="img/duke.png" height="50px">
+          <ul class="list-unstyled mt-3 mb-4">
+            <li>Click below to retrieve Java details from your JBoss EAP instance</li>
+          </ul>
+            <button type="button" id="javadetails" class="btn btn-lg btn-block btn-primary">Get Java Details</button>
+            <ul class="list-unstyled mt-3 mb-4" id="javadetailsresult"></ul>
+        </div>
+      </div>
+      <div class="card mb-4 box-shadow">
+        <div class="card-header">
+          <h4 class="my-0 font-weight-normal">JBoss EAP Server Configuration</h4>
+        </div>
+        <div class="card-body">
+          <img src="img/eap-logo.png" height="50px">
+          <ul class="list-unstyled mt-3 mb-4">
+            <li></li>
+            <li>Click below to retrieve all system properties from JBoss EAP</li>
+          </ul>
+            <button type="button" id="serverconfig" class="btn btn-lg btn-block btn-primary">Server Properties</button>
+            <ul class="list-unstyled mt-3 mb-4" id="serverconfigresult"></ul>
+        </div>
+      </div>
+      <div class="card mb-4 box-shadow">
+        <div class="card-header">
+          <h4 class="my-0 font-weight-normal">OpenShift Configuration</h4>
+        </div>
+        <div class="card-body">
+          <img src="img/openshift-logo.png" height="50px">
+          <ul class="list-unstyled mt-3 mb-4">
+            <li></li>
+            <li>Click below to retrieve runtime properties from OpenShift</li>
+          </ul>
+            <button type="button" id="openshiftconfig" class="btn btn-lg btn-block btn-primary">OpenShift Configuration</button>
+            <ul class="list-unstyled mt-3 mb-4" id="openshiftconfigresult"></ul>
+        </div>
+      </div>
+    </div>
+
+    <br />
+  </div>
+
+
+  <div class="container">
+
+
+    <footer class="pt-4 my-md-5 pt-md-5 border-top">
+      <div class="row">
+        <div class="col-6 col-md">
+          <h5>Features</h5>
+          <ul class="list-unstyled text-small">
+            <li><a class="text-muted"
+                href="https://www.redhat.com/en/technologies/jboss-middleware/application-platform/features">Optimized for cloud</a></li>
+            <li><a class="text-muted"
+                href="https://www.redhat.com/en/technologies/jboss-middleware/application-platform/features">Lightweight, flexible architecture</a></li>
+            <li><a class="text-muted"
+                href="https://www.redhat.com/en/technologies/jboss-middleware/application-platform/features">Flexible management, configuration, and administration</a></li>
+            <li><a class="text-muted"
+                href="https://www.redhat.com/en/technologies/jboss-middleware/application-platform/features">More productive developers</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-md">
+          <h5>Resources</h5>
+          <ul class="list-unstyled text-small">
+            <li><a class="text-muted"
+                href="https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/8-beta">Documentation</a>
+            </li>
+            <li><a class="text-muted" href="https://www.redhat.com/en/technologies/jboss-middleware/application-platform#contact-form">Contact Sales</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 col-md">
+          <img class="mb-2" src="img/redhat.png" alt="" width="24" height="24">
+          <small class="d-block mb-3 text-muted">&copy; 2023</small>
+        </div>
+    </footer>
+  </div>
+
+
+
+  <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script
+  src="https://code.jquery.com/jquery-3.6.3.min.js"
+  integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU="
+  crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+  $( document ).ready( function() {
+    var javadetailsvisible = false;
+    var eapdetailsvisible = false;
+    var ocpdetailsvisible = false;
+
+      $( '#javadetails' ).click( function( event ) {
+        if (!javadetailsvisible){
+          javadetailsvisible = true;
+          var javadetailsElement = document.getElementById('javadetailsresult');
+          javadetailsElement.style.display = 'block';
+          event.preventDefault();
+
+          var result = $( '#javadetailsresult' );
+          console.log("result:" + result);
+          result.removeClass( 'invalid' );
+
+          $.ajax( 'services/javadetails', {
+              type:'GET',
+              success:function ( data ) {
+                  console.log("success: " + JSON.stringify(data));
+                  $( '#javadetailsresult' ).empty();
+                  for (const [key, value] of Object.entries(data)) {
+                    $( '#javadetailsresult' ).append('<li><b>' + key + "</b> = <code>" + value + "</code></li>");
+                  }
+              },
+              error: function(err) {
+                console.log("error: " + err);
+              }
+          })
+        } else {
+          javadetailsvisible = false;
+          var javadetailsElement = document.getElementById('javadetailsresult');
+          javadetailsElement.style.display = 'none';
+        }
+      });
+
+      $( '#serverconfig' ).click( function( event ) {
+        if (!eapdetailsvisible){
+          eapdetailsvisible = true;
+          var eapdetailsElement = document.getElementById('serverconfigresult');
+          eapdetailsElement.style.display = 'block';
+          event.preventDefault();
+
+          var result = $( '#serverconfigresult' );
+          console.log("result:" + result);
+          result.removeClass( 'invalid' );
+
+          $.ajax( 'services/serverconfig', {
+              type:'GET',
+              success:function ( data ) {
+                  console.log("success: " + JSON.stringify(data));
+                  $( '#serverconfigresult' ).empty();
+                  for (const [key, value] of Object.entries(data)) {
+                    $( '#serverconfigresult' ).append('<li><b>' + key + "</b> = <code>" + value + "</code></li>");
+
+                  }
+              },
+              error: function(err) {
+                console.log("error: " + err);
+              }
+          })
+        } else {
+          eapdetailsvisible = false;
+          var eapdetailsElement = document.getElementById('serverconfigresult');
+          eapdetailsElement.style.display = 'none';
+        }
+      });
+
+      $( '#openshiftconfig' ).click( function( event ) {
+        if (!ocpdetailsvisible){
+          ocpdetailsvisible = true;
+          var ocpdetailsElement = document.getElementById('openshiftconfigresult');
+          ocpdetailsElement.style.display = 'block';
+          event.preventDefault();
+
+          var result = $( '#openshiftconfigresult' );
+          console.log("result:" + result);
+          result.removeClass( 'invalid' );
+
+          $.ajax( 'services/openshiftconfig', {
+              type:'GET',
+              success:function ( data ) {
+                  console.log("success: " + JSON.stringify(data));
+                  $( '#openshiftconfigresult' ).empty();
+                  for (const [key, value] of Object.entries(data)) {
+                    $( '#openshiftconfigresult' ).append('<li><b>' + key + "</b> = <code>" + value + "</code></li>");
+
+                  }
+              },
+              error: function(err) {
+                console.log("error: " + err);
+              }
+          })
+        } else {
+          ocpdetailsvisible = false;
+          var ocpdetailsElement = document.getElementById('openshiftconfigresult');
+          ocpdetailsElement.style.display = 'none';
+        }
+      });
+
+  }); // (document).ready
+</script>
+
+</body>
+
 </html>
