@@ -1,0 +1,56 @@
+
+{{- if ne .Values.git.verify_commits "enabled" }}
+kind: ConfigMap
+metadata:
+  name: {{ .Values.app.name }}-trigger-pipeline
+apiVersion: v1
+data:
+  trigger-pipeline.yaml: |
+    apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: {{ .Values.app.name }}-run-build-
+      labels:
+        backstage.io/kubernetes-id: {{ .Values.app.name }}
+    spec:
+      params:
+        - name: source-repo
+          value: {{ .Values.git.repo }}
+        - name: source-branch
+          value: {{ .Values.git.branch }}
+        - name: output-image
+          value: {{ include "image.dev-url" . }}
+        - name: git-host
+          value: gitlab-gitlab{{ .Values.app.cluster }}
+        - name: git-owner
+          value: {{ .Values.git.org }}
+        - name: component-id
+          value: {{ .Values.app.name }}
+        - name: common-password-secret
+          value: common-password-secret
+      pipelineRef:
+        name: {{ .Values.app.name }}-build
+      serviceAccountName: pipeline
+      timeout: 1h0m0s
+      workspaces:
+        - name: reports
+          emptyDir: {}
+        - name: source-folder
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi
+        - emptyDir: {}
+          name: maven-settings
+{{- if eq .Values.image.registry "Quay" }}
+        - name: docker-config
+          secret:
+            secretName: {{ .Values.app.name }}-registry-creds
+{{- else }}
+        - name: docker-config
+          emptyDir: {}
+{{- end }}
+{{- end }}

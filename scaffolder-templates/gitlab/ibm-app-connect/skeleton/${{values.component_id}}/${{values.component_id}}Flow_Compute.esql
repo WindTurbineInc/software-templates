@@ -1,0 +1,41 @@
+BROKER SCHEMA BusinessFlow
+
+
+CREATE COMPUTE MODULE BusinessFlow_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- CALL CopyMessageHeaders();
+		-- CALL CopyEntireMessage();
+		
+		DECLARE OpName CHARACTER InputRoot.JSON.Data.CalcReq.Operation;
+		DECLARE Parm1  DECIMAL   InputRoot.JSON.Data.CalcReq.Value1;
+		DECLARE Parm2  DECIMAL 	 InputRoot.JSON.Data.CalcReq.Value2;
+		
+		IF UPPER(OpName) = 'ADD' THEN
+			SET OutputRoot.JSON.Data.CalcRes.Result = Add(Parm1,Parm2);
+		ELSEIF UPPER(OpName) = 'SUBTRACT' THEN	
+			SET OutputRoot.JSON.Data.CalcRes.Result = Subtract(Parm1,Parm2);
+		ELSEIF UPPER(OpName) = 'MULTIPLY' THEN	
+			SET OutputRoot.JSON.Data.CalcRes.Result = Multiply(Parm1,Parm2);
+		ELSEIF UPPER(OpName) = 'DIVIDE' THEN
+			SET OutputRoot.JSON.Data.CalcRes.Result = Divide(Parm1,Parm2);	
+		ELSE
+			SET OutputRoot.JSON.Data.CalcRes.Result = 'NOT Valid Function';	
+		END IF;			
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;

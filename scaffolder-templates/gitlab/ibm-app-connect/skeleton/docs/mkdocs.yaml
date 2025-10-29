@@ -1,0 +1,11 @@
+site_name: ${{values.component_id}}
+site_description: ${{values.description}}
+repo_url: https://${{values.host}}/${{values.destination}}
+edit_uri: edit/master/docs
+
+plugins:
+  - techdocs-core
+
+# Note for content editors, edit only the section below
+nav:
+  - Introductions: index.md

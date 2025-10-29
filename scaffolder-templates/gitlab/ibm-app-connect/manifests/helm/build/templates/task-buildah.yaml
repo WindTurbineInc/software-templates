@@ -1,0 +1,116 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  labels:
+    app.kubernetes.io/version: "0.1"
+    build.appstudio.redhat.com/build_type: "docker"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: "image-build, appstudio, hacbs"
+  name: buildah
+spec:
+  description: |-
+    Buildah task builds source code into a container image and pushes the image into container registry using buildah tool.
+  params:
+  - description: Reference of the image buildah will produce.
+    name: IMAGE
+    type: string
+  - default: quay.io/redhat-appstudio/buildah:v1.31.0@sha256:34f12c7b72ec2c28f1ded0c494b428df4791c909f1f174dd21b8ed6a57cf5ddb
+    description: The location of the buildah builder image.
+    name: BUILDER_IMAGE
+    type: string
+  - default: ./Dockerfile
+    description: Path to the Dockerfile to build.
+    name: DOCKERFILE
+    type: string
+  - default: .
+    description: Path to the directory to use as context.
+    name: CONTEXT
+    type: string
+  - default: "true"
+    description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
+    name: TLSVERIFY
+    type: string
+  - description: unused, should be removed in next task version
+    name: DOCKER_AUTH
+    type: string
+    default: ""
+  - default: "false"
+    description: Determines if build will be executed without network access.
+    name: HERMETIC
+    type: string
+  - default: ""
+    description: In case it is not empty, the prefetched content should be made available to the build.
+    name: PREFETCH_INPUT
+    type: string
+  - default: ""
+    description: Delete image tag after specified time. Empty means to keep the image tag. Time values could be something like 1h, 2d, 3w for hours, days, and weeks, respectively.
+    name: IMAGE_EXPIRES_AFTER
+    type: string
+  - name: COMMIT_SHA
+    description: The image is built from this commit.
+    type: string
+    default: ""
+  results:
+  - description: Digest of the image just built
+    name: IMAGE_DIGEST
+  - description: Image repository where the built image was pushed
+    name: IMAGE_URL
+  - description: Digests of the base images used for build
+    name: BASE_IMAGES_DIGESTS
+  - name: SBOM_JAVA_COMPONENTS_COUNT
+    description: The counting of Java components by publisher in JSON format
+    type: string
+  - name: JAVA_COMMUNITY_DEPENDENCIES
+    description: The Java dependencies that came from community sources such as Maven central.
+  stepTemplate:
+    env:
+    - name: BUILDAH_FORMAT
+      value: oci
+    - name: STORAGE_DRIVER
+      value: vfs
+    - name: HERMETIC
+      value: $(params.HERMETIC)
+    - name: PREFETCH_INPUT
+      value: $(params.PREFETCH_INPUT)
+    - name: CONTEXT
+      value: $(params.CONTEXT)
+    - name: DOCKERFILE
+      value: $(params.DOCKERFILE)
+    - name: IMAGE
+      value: $(params.IMAGE)
+    - name: TLSVERIFY
+      value: $(params.TLSVERIFY)
+    - name: IMAGE_EXPIRES_AFTER
+      value: $(params.IMAGE_EXPIRES_AFTER)
+  steps:
+  - image: $(params.BUILDER_IMAGE)
+    name: build
+    resources:
+      limits:
+        memory: 4Gi
+        cpu: '2'
+      requests:
+        memory: 512Mi
+        cpu: 250m
+    env:
+    - name: COMMIT_SHA
+      value: $(params.COMMIT_SHA)
+    script: |
+      echo $(ls -a)
+      SOURCE_CODE_DIR=./
+      echo "Build completed successfully "
+    securityContext:
+      capabilities:
+        add:
+          - SETFCAP
+    volumeMounts:
+    - mountPath: /var/lib/containers
+      name: varlibcontainers
+    workingDir: $(workspaces.source.path)
+  volumes:
+  - emptyDir: {}
+    name: varlibcontainers
+  workspaces:
+  - name: source
+    description: Workspace containing the source code to build.
