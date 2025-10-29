@@ -5,7 +5,7 @@
 image:
   tag: latest
 build:
-  uri: https://github.com/jboss-eap-up-and-running/eap8-getting-started.git
+  uri: ${{values.eap_app_git}}
   enabled: true
   mode: s2i
   s2i:
