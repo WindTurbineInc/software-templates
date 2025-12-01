@@ -71,7 +71,7 @@ spec:
                   title: Image Host
                   type: string
                   description: Host for storing image
-                  default: quay-bjqtd.apps.cluster-bjqtd.bjqtd.sandbox1429.opentlc.com/
+                  default: quay-bjqtd.apps.cluster-bjqtd.bjqtd.sandbox1429.opentlc.com
                 image_organization:
                   title: Organization
                   type: string
@@ -94,7 +94,7 @@ spec:
               title: Repo Host
               type: string
               description: Your SCM host
-              default: gitlab-gitlab.apps.cluster-bjqtd.bjqtd.sandbox1429.opentlc.com/
+              default: gitlab-gitlab.apps.cluster-bjqtd.bjqtd.sandbox1429.opentlc.com
             owner:
               title: Repo Owner
               type: string
