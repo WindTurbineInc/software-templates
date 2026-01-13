@@ -1,6 +1,6 @@
 schemaVersion: 2.2.0
 metadata:
-  generateName: smiles-of-miles-
+  generateName: smiles-of-miles
 components:
   - name: development-tooling
     container:
