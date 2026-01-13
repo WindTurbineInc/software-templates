@@ -161,7 +161,7 @@ spec:
           source_repository: https://${{ parameters.repo.host }}/${{ parameters.repo.owner }}/${{parameters.component_id}}.git
           repository_name: ${{parameters.component_id}}
           git_owner: ${{ parameters.repo.owner }}
-          cluster: .apps.cluster-xbn4z.xbn4z.sandbox3609.opentlc.com/
+          cluster: .apps.cluster-xbn4z.xbn4z.sandbox3609.opentlc.com
           namespace: ${{ parameters.component_id }}-dev
           image_registry: ${{ parameters.image_registry }}
           image_host: ${{ parameters.image_host }}
