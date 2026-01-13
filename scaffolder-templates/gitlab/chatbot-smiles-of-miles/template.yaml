@@ -39,6 +39,7 @@ spec:
           title: Model Name
           type: string
           enum:
+            - qwen3-14b
             - llama-4-scout-17b
             - llama-3-2b
             - deepseek-r1
