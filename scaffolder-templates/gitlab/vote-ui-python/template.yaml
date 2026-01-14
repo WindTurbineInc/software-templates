@@ -2,7 +2,7 @@ apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
   name: vote-frontend-python
-  title: Python UI frontend for the Vote App
+  title: Python UI frontend for the Vote App 
   description: Creates the frontend for the Vote App in Python with Tekton Pipelines and Argo CD Applications
   tags:
     - python
@@ -118,8 +118,6 @@ spec:
       action: publish:gitlab
       input:
         repoUrl: "gitlab-gitlab.apps.cluster-xbn4z.xbn4z.sandbox3609.opentlc.com?owner=${{ user.entity.metadata.name }}&repo=${{parameters.component_id}}-gitops"
-        title: gitops resources for ${{ parameters.component_id }}
-        description: gitops resources for ${{ parameters.component_id }}
         sourcePath: ./tenant-gitops
         repoVisibility: public
 
