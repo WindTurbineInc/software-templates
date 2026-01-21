@@ -183,8 +183,6 @@ spec:
       action: publish:gitlab
       input:
         repoUrl: "${{ parameters.repo.host }}?owner=${{ parameters.repo.owner }}&repo=${{ parameters.namespace }}-${{ parameters.application_id }}-gitops"
-        title: gitops resources for ${{ parameters.namespace }}-${{ parameters.application_id }}
-        description: gitops resources for ${{ parameters.namespace }}-${{ parameters.application_id }}
         sourcePath: ./tenant-gitops
         repoVisibility: public
 
