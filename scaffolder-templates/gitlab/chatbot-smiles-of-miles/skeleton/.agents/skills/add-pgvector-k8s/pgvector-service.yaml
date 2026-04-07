@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: pgvector
+spec:
+  selector:
+    app: pgvector
+  ports:
+    - name: pgvector
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
