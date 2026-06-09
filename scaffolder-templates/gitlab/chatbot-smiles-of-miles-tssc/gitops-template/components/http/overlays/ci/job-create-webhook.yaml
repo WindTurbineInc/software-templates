@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${{ values.name }}-webhook-job
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  backoffLimit: 100
+  template:
+    spec:
+      containers:
+      - name: create-webhook
+        command:
+          - /bin/bash
+          - '-c'
+          - |
+            set -x
+            ansible-playbook -i localhost /scripts/playbook.yaml \
+            -e git_host=${{ values.gitlabHost }} \
+            -e git_project=${{ values.name }} \
+            -e git_token=$(cat /secrets/auth/password) \
+            -e webhook_secret=$(cat /secrets/webhook/token)
+        image: quay.io/agnosticd/ee-multicloud:latest
+        volumeMounts:
+          - mountPath: /scripts
+            name: ${{ values.name }}-script-vol
+          - mountPath: /secrets/auth
+            name: gitlab-auth-secret
+          - mountPath: /secrets/webhook
+            name: gitlab-webhook-secret
+      restartPolicy: Never
+      volumes:
+      - name: ${{ values.name }}-script-vol
+        configMap:
+          name: ${{ values.name }}-webhook-script
+      - name: gitlab-auth-secret
+        secret:
+          secretName: gitlab-auth-secret
+      - name: gitlab-webhook-secret
+        secret:
+          secretName: ${{values.name}}-webhook-secret

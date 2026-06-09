@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:         
+  argocd/app-name: smiles-of-miles
+  janus-idp.io/tekton: smiles-of-miles
+  backstage.io/kubernetes-id: smiles-of-miles
+  backstage.io/kubernetes-namespace: tssc-app 
+  app.kubernetes.io/part-of: smiles-of-miles
+resources:
+  - deployment.yaml
+  - route.yaml
+  - service.yaml
+  - pgvector-deployment.yaml
+  - pgvector-secret.yaml
+  - pgvector-service.yaml
+  - pgvector-pvc.yaml
+  - mcp-weather-deployment.yaml
+  - mcp-weather-service.yaml

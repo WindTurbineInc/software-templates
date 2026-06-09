@@ -1,0 +1,105 @@
+kind: ConfigMap
+metadata:
+  name:  ${{ values.name }}-webhook-script
+apiVersion: v1
+data:
+  playbook.yaml: |
+{% raw %}
+    - hosts: localhost
+      vars:
+        git_host: ''
+        git_project: ''
+        git_token: ''
+        webhook_secret: ''
+      tasks:
+        - name: Get gitlab projects
+          ansible.builtin.uri:
+            url: https://{{ git_host }}/api/v4/projects
+            method: GET
+            body_format: form-urlencoded
+            headers:
+              PRIVATE-TOKEN: '{{ git_token }}'
+            validate_certs: false
+            status_code: [200]
+          register: r_git_projects
+
+        - name: set gitlab projects id
+          set_fact:
+            git_project_id: '{{ r_git_projects.json | json_query(query) }}'
+          vars:
+            query: "[?name=='{{ git_project }}'].id"
+
+        - name: Create {{ git_project }} web hook push
+          ansible.builtin.uri:
+            url: https://{{ git_host }}/api/v4/projects/{{ git_project_id[0] }}/hooks
+            method: POST
+            body_format: form-urlencoded
+            body:
+              url: http://nginx.nginx.svc:7777
+              push_events: true
+              token: '{{  webhook_secret }}'
+              enable_ssl_verification: false
+            headers:
+              PRIVATE-TOKEN: '{{  git_token }}'
+            validate_certs: false
+            status_code: [201]
+
+        - name: Create {{ git_project }} web hook tag
+          ansible.builtin.uri:
+            url: https://{{ git_host }}/api/v4/projects/{{ git_project_id[0] }}/hooks
+            method: POST
+            body_format: form-urlencoded
+            body:
+              url: http://nginx.nginx.svc:7777
+              tag_push_events: true
+              push_events: false
+              token: '{{  webhook_secret }}'
+              enable_ssl_verification: false
+            headers:
+              PRIVATE-TOKEN: '{{  git_token }}'
+            validate_certs: false
+            status_code: [201]
+
+        - name: Create {{ git_project }} web hook release
+          ansible.builtin.uri:
+            url: https://{{ git_host }}/api/v4/projects/{{ git_project_id[0] }}/hooks
+            method: POST
+            body_format: form-urlencoded
+            body:
+              url: http://nginx.nginx.svc:7778
+              releases_events: true
+              push_events: false
+              token: '{{  webhook_secret }}'
+              custom_webhook_template: >-
+                {% raw %}
+                {"object_kind": "{{object_kind}}","ref": "{{tag}}","project": {"name": "{{project.name}}","web_url": "{{project.web_url}}","path_with_namespace": "{{project.path_with_namespace}}"},"commits": [{"id": "{{commit.id}}","message": "{{commit.message}}","title": "{{commit.title}}","url": "{{commit.url}}","author": {"name": "{{commit.author.name}}","email": "{{commit.author.email}}"}}]}
+                {% endraw %}
+              enable_ssl_verification: false
+            headers:
+              PRIVATE-TOKEN: '{{  git_token }}'
+            validate_certs: false
+            status_code: [201]
+
+{% endraw %}
+{%- if values.verifyCommits != 'enabled' %}
+{% raw %}
+
+        - name: Trigger pipeline
+          ansible.builtin.uri:
+            url: https://{{ git_host }}/api/v4/projects/{{ git_project_id[0] }}/repository/commits
+            method: POST
+            body_format: json
+            body:
+              branch: "master"
+              commit_message: "Trigger pipeline - dummy commit"
+              actions:
+                - action: "create"
+                  file_path: ".trigger-timestamp"
+                  content: "{{ now(utc=True).isoformat() }}"
+            headers:
+              PRIVATE-TOKEN: '{{  git_token }}'
+            validate_certs: false
+            status_code: [201]
+
+{% endraw %}
+{%- endif %}

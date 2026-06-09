@@ -1,0 +1,67 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: maven-image-build
+  annotations:
+    pipelinesascode.tekton.dev/on-cel-expression: |
+      body.object_kind == "push" && body.ref == "refs/heads/master"
+    pipelinesascode.tekton.dev/pipeline: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/pipelines/maven-build-ci.yaml"
+    pipelinesascode.tekton.dev/task-0: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/init.yaml"
+    pipelinesascode.tekton.dev/task-1: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/git-clone.yaml"
+    pipelinesascode.tekton.dev/task-2: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/buildah-rhtap.yaml"
+    pipelinesascode.tekton.dev/task-3: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/acs-image-check.yaml"
+    pipelinesascode.tekton.dev/task-4: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/acs-image-scan.yaml"
+    pipelinesascode.tekton.dev/task-5: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/acs-deploy-check.yaml"
+    pipelinesascode.tekton.dev/task-6: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/update-deployment.yaml"
+    pipelinesascode.tekton.dev/task-7: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/show-sbom-rhdh.yaml"
+    pipelinesascode.tekton.dev/task-8: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/summary.yaml"
+    pipelinesascode.tekton.dev/task-9: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/maven.yaml"
+    pipelinesascode.tekton.dev/task-10: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/upload-sbom-to-trustification.yaml"
+    pipelinesascode.tekton.dev/task-11: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/verify-commit.yaml"
+  labels:
+    backstage.io/kubernetes-id: "${{values.name}}"
+spec:
+  params:
+    - name: component-name
+      value: ${{values.name}}
+    - name: dockerfile
+      value: ./Dockerfile
+    - name: git-url
+      value: '{{repo_url}}'
+    - name: image-expires-after
+      value: 5d
+    - name: output-image
+      value: "${{values.quayHost}}/tssc/${{values.name}}:{{revision}}"
+    - name: path-context
+      value: ./
+    - name: revision
+      value: '{{revision}}'
+    - name: event-type
+      value: '{{event_type}}'
+{%- if values.verifyCommits == 'enabled' %}
+    - name: certificate-identity
+      value: '{{body.commits[0].author.email}}'
+    - name: oidc-issuer
+      value: https://sso.${{values.cluster}}/realms/tssc-iam
+    - name: verify-commit
+      value: 'true'
+{%- endif %}
+  pipelineRef:
+    name: maven-build-ci
+  workspaces:
+    - name: gitops-auth
+      secret:
+        secretName: "{{ git_auth_secret }}"
+    - name: git-auth
+      secret:
+        secretName: "{{ git_auth_secret }}"
+    - name: workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - name: maven-settings
+      emptyDir: {}

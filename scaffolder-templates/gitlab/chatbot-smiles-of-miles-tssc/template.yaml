@@ -1,0 +1,216 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: chatbot-smiles-of-miles-template
+  title: Smiles of Miles AI Chatbot (Tekton)
+  description: Create a Quarkus AI Chatbot with LangChain4j, RAG, and MCP built with Red Hat Trusted Application Pipeline on Tekton
+  tags:
+    - recommended
+    - java
+    - quarkus
+    - maven
+    - ai
+    - chatbot
+    - langchain4j
+spec:
+  owner: tssc
+  type: service
+  parameters:
+    - title: Provide Information for Application
+      required:
+        - name
+      properties:
+        name:
+          title: Name
+          type: string
+          description: Unique name of the component
+          default: smiles-of-miles
+          ui:field: EntityNamePicker
+          maxLength: 23
+        description:
+          title: Description
+          type: string
+          description: Help others understand what this website is for.
+          default: A Quarkus AI Chatbot with LangChain4j
+    - title: Large Language Model
+      required:
+        - model_name
+        - model_max_length
+      properties:
+        model_name:
+          title: Model Name
+          type: string
+          enum:
+            - qwen3-14b
+            - llama-4-scout-17b
+            - llama-3-2b
+            - deepseek-r1
+            - mistral-7b-instruct-v03
+            - parasol-instruct
+            - granite-30-8b-instruct
+        model_max_length:
+          title: Max model length
+          default: "4096"
+          type: string
+          description: The maximum length for this model
+    - title: Provide Image Registry Information
+      required:
+        - imageHost
+        - imageOrganization
+      properties:
+        imageHost:
+          title: Image Registry
+          type: string
+          default: Quay
+          enum:
+            - Quay
+        imageOrganization:
+          title: Organization
+          type: string
+          description: Name of the Quay Organization
+          default: tssc
+    - title: Application repository Information
+      required:
+        - repoHost
+        - repoOwner
+        - repoVerifyCommits
+      properties:
+        repoHost:
+          title: Source Repo
+          type: string
+          default: Gitlab
+          enum:
+            - Gitlab
+        repoOwner:
+          title: Repo Owner
+          type: string
+          description: Your SCM host organization/group
+          default: development
+        repoVerifyCommits:
+          title: Verify Commits
+          type: string
+          description: Verify Git repository commits using Red Hat’s Trusted Artifact Signer (TAS) service
+          default: disabled
+          enum:
+            - enabled
+            - disabled
+
+  steps:
+    - id: fetch-provision-data
+      name: Fetch Provision Data
+      action: catalog:fetch
+      input:
+        entityRef: component:default/provisioning-data
+
+    - id: template
+      name: Fetch Skeleton + Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          namespace: tssc-app
+          description: ${{ parameters.description }}
+          owner: user:default/${{ user.entity.metadata.name }}
+          cluster: ${{ steps["fetch-provision-data"].output.entity.metadata.labels["ocp-apps-domain"] }}
+          gitlabHost: gitlab-gitlab.${{ steps["fetch-provision-data"].output.entity.metadata.labels["ocp-apps-domain"] }}
+          quayHost: quay-${{ steps["fetch-provision-data"].output.entity.metadata.labels["guid"] }}.${{ steps["fetch-provision-data"].output.entity.metadata.labels["ocp-apps-domain"] }}
+          destination: ${{ parameters.repoOwner }}/${{ parameters.name }}
+          quayDestination: ${{ parameters.imageOrganization}}/${{ parameters.name }}
+          port: 8080
+          verifyCommits: ${{ parameters.repoVerifyCommits }}
+          model_name: ${{ parameters.model_name }}
+          model_max_length: ${{ parameters.model_max_length }}
+
+    - id: publish-gitlab-source
+      name: Publish
+      action: publish:gitlab
+      input:
+        repoUrl: 'gitlab-gitlab.${{ steps["fetch-provision-data"].output.entity.metadata.labels["ocp-apps-domain"] }}?owner=${{
+          parameters.repoOwner }}&repo=${{parameters.name}}'
+        repoVisibility: public
+
+    - id: fetch-gitops-skeleton
+      name: Fetch Gitops Skeleton
+      action: fetch:template
+      input:
+        url: ./gitops-template
+        targetPath: gitops
+        values:
+          name: ${{ parameters.name }}
+          appName: ${{ parameters.name }}-gitops
+          description: This is GitOps manifest for ${{ parameters.name }}
+          namespace: tssc-app
+          repoURL: 'https://gitlab-gitlab.${{ steps["fetch-provision-data"].output.entity.metadata.labels["ocp-apps-domain"] }}/${{
+            parameters.repoOwner }}/${{ parameters.name }}-gitops'
+          srcRepoURL: 'https://gitlab-gitlab.${{ steps["fetch-provision-data"].output.entity.metadata.labels["ocp-apps-domain"] }}/${{
+            parameters.repoOwner }}/${{ parameters.name }}'
+          argoComponent: './components/${{ parameters.name }}/overlays/development'
+          argoComponentOverlays: './components/${{ parameters.name }}/overlays'
+          owner: user:default/${{ user.entity.metadata.name }}
+          image: quay.io/redhat-appstudio/rhtap-task-runner:latest
+          srcImage: 'quay-${{ steps["fetch-provision-data"].output.entity.metadata.labels["guid"] }}.${{ steps["fetch-provision-data"].output.entity.metadata.labels["ocp-apps-domain"] }}/${{ parameters.imageOrganization }}/${{ parameters.name }}'
+          port: 8080
+          argoNS: tssc-gitops
+          argoProject: default
+          gitlabHost: gitlab-gitlab.${{ steps["fetch-provision-data"].output.entity.metadata.labels["ocp-apps-domain"] }}
+          gitRepoOwner: ${{ parameters.repoOwner }}
+          gitRepoName: ${{ parameters.name }}-gitops
+          gitWebhookSecret: openshift
+          defaultBranch: master
+          verifyCommits: ${{ parameters.repoVerifyCommits }}
+
+    - action: fs:rename
+      id: renameComponentDir
+      name: Rename Component Directory
+      input:
+        files:
+          - from: gitops/components/http
+            to: gitops/components/${{ parameters.name }}
+            overwrite: true
+
+    - id: publish-gitlab-gitops
+      name: Publish GitOps Repository to GitLab
+      action: publish:gitlab
+      input:
+        sourcePath: gitops
+        repoUrl: 'gitlab-gitlab.${{ steps["fetch-provision-data"].output.entity.metadata.labels["ocp-apps-domain"] }}?owner=${{
+          parameters.repoOwner }}&repo=${{parameters.name}}-gitops'
+        defaultBranch: master
+        repoVisibility: "public"
+
+    - id: create-argocd-resources
+      name: Create ArgoCD Resources
+      action: argocd:create-resources
+      input:
+        appName: ${{ parameters.name }}-app-of-apps
+        argoInstance: default
+        namespace: tssc-gitops
+        repoUrl: https://gitlab-gitlab.${{ steps["fetch-provision-data"].output.entity.metadata.labels["ocp-apps-domain"] }}/${{ parameters.repoOwner }}/${{ parameters.name }}-gitops.git
+        path: './app-of-apps'
+
+    - id: register-source
+      name: Register Source
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish-gitlab-source'].output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+    - id: register-gitops
+      name: Register Gitops
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish-gitlab-gitops'].output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Source Repository
+        url: ${{ steps['publish-gitlab-source'].output.remoteUrl }}
+      - title: GitOps Repository
+        url: ${{ steps['publish-gitlab-gitops'].output.remoteUrl }}
+      - title: Open Component in catalog
+        icon: catalog
+        entityRef: ${{ steps['register-source'].output.entityRef }}
+      - title: Open GitOps Resource in catalog
+        icon: catalog
+        entityRef: ${{ steps['register-gitops'].output.entityRef }}

@@ -1,0 +1,42 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: promote-to-stage
+  annotations:
+    pipelinesascode.tekton.dev/on-cel-expression: |
+      body.object_kind == "tag_push"
+    pipelinesascode.tekton.dev/pipeline: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/pipelines/promote-to-env.yaml"
+    pipelinesascode.tekton.dev/task-1: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/gather-images-to-verify.yaml"
+    pipelinesascode.tekton.dev/task-2: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/verify-enterprise-contract.yaml"
+    pipelinesascode.tekton.dev/task-3: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/skopeo-copy.yaml"
+    pipelinesascode.tekton.dev/task-4: "https://${{values.gitlabHost}}/rhdh/tssc-sample-pipelines/-/raw/main/tasks/update-deployment.yaml"
+  labels:
+    backstage.io/kubernetes-id: "${{values.name}}"
+spec:
+  params:
+  - name: git-url
+    value: '{{repo_url}}'
+  - name: revision
+    value: '{{revision}}'
+  - name: target-branch
+    value: '{{target_branch}}'
+  - name: source-image
+    value: '${{values.quayHost}}/tssc/${{values.name}}'
+  - name: source-image-tag
+    value: '{{revision}}'
+  - name: environment
+    value: stage
+  pipelineRef:
+    name: promote-to-env
+  workspaces:
+    - name: workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - name: gitops-auth
+      secret:
+        secretName: "{{ git_auth_secret }}"

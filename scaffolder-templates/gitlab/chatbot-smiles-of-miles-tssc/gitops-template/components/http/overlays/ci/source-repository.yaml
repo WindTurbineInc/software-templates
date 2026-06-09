@@ -1,0 +1,13 @@
+apiVersion: "pipelinesascode.tekton.dev/v1alpha1"
+kind: Repository
+metadata:
+  name: ${{ values.name }}-repository
+spec:
+  url: ${{ values.srcRepoURL }}
+  git_provider:
+    secret:
+      name: gitlab-auth-secret
+      key: password
+    webhook_secret:
+      name: ${{values.name}}-webhook-secret
+      key:  token
