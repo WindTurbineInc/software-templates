@@ -71,7 +71,7 @@ spec:
       name: Generating the source code component
       action: fetch:template
       input:
-        url: ./skeleton
+        url: https://github.com/redhat-developer-demos/quinoa-wind-turbine/tree/main
         targetPath: ./source
         values:
           githubOrg: ${{parameters.githubOrg}}
